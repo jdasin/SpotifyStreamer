@@ -27,6 +27,7 @@ public class ArtistDetailFragment extends Fragment {
     private TopTracksAdapter mAdapter;
     public TrackListHandler mTrackListHandler;
     private ArrayList<Track> mTracks;
+    private ArtistInfo mArtistInfo;
 
     public ArtistDetailFragment() {
         mTracks = new ArrayList<Track>();
@@ -36,6 +37,7 @@ public class ArtistDetailFragment extends Fragment {
         super.onAttach(activity);
         try {
             mTrackListHandler = (TrackListHandler) activity;
+            mArtistInfo = mTrackListHandler.getCurrentArtistData();
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString() + " must implement TrackListHandler.");
         }
@@ -46,17 +48,15 @@ public class ArtistDetailFragment extends Fragment {
         ListView listView = (ListView) inflatedView.findViewById(R.id.list_view);
         mAdapter = new TopTracksAdapter(getActivity());
         listView.setAdapter(mAdapter);
-        String artistId = getActivity().getIntent().getExtras().getString("artist_id");
-        final String artistName = getActivity().getIntent().getExtras().getString("artist_name");
         ArtistTop10TracksTask task = new ArtistTop10TracksTask();
-        task.execute(artistId);
+        task.execute(mArtistInfo.getArtistId());
         AdapterView.OnItemClickListener onITemClickListener = new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Object clickedObject = parent.getAdapter().getItem(position);
-                if (clickedObject instanceof Track) {
-                    mTrackListHandler.onTrackSelected(position, mTracks, artistName);
-                }
+            Object clickedObject = parent.getAdapter().getItem(position);
+            if (clickedObject instanceof Track) {
+                mTrackListHandler.onTrackSelected(position, mTracks, mArtistInfo.getArtistName());
+            }
             }
         };
         listView.setOnItemClickListener(onITemClickListener);
@@ -96,6 +96,9 @@ public class ArtistDetailFragment extends Fragment {
     }
 
     public interface TrackListHandler {
-        public void onTrackSelected(int selectedTrackPosition, ArrayList<Track> tracks, String artistName);
+        void onTrackSelected(int selectedTrackPosition, ArrayList<Track> tracks, String artistName);
+        ArtistInfo getCurrentArtistData();
     }
+
+
 }

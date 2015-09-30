@@ -1,5 +1,6 @@
 package com.jdasin.www.spotifystreamer;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
@@ -27,7 +28,17 @@ public class MainActivityFragment extends Fragment {
 
     private ArtistsAdapter mAdapter;
     private ArrayList<Artist> mArtists;
+    private ArtistListHandler mArtistsListHandler;
 
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            mArtistsListHandler = (ArtistListHandler) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString() + " must implement TrackListHandler.");
+        }
+    }
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
@@ -51,10 +62,7 @@ public class MainActivityFragment extends Fragment {
                 Object clickedObject = parent.getAdapter().getItem(position);
                 if (clickedObject instanceof Artist) {
                     Artist artist = (Artist)clickedObject;
-                    Intent intent = new Intent(getActivity(),ArtistDetail.class);
-                    intent.putExtra("artist_id", artist.getId());
-                    intent.putExtra("artist_name", artist.getName());
-                    startActivity(intent);
+                    mArtistsListHandler.onArtistSelected(artist);
                 }
             }
         };
@@ -111,5 +119,8 @@ public class MainActivityFragment extends Fragment {
             mAdapter.setNotifyOnChange(true);
             mAdapter.notifyDataSetChanged();
         }
+    }
+    public interface ArtistListHandler {
+        void onArtistSelected(Artist artist);
     }
 }

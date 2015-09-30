@@ -1,16 +1,33 @@
 package com.jdasin.www.spotifystreamer;
 
+import android.content.Intent;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class MainActivity extends ActionBarActivity {
+import com.jdasin.www.spotifystreamer.model.Artist;
+import com.jdasin.www.spotifystreamer.model.Track;
+
+import java.util.ArrayList;
+
+public class MainActivity extends ActionBarActivity implements ArtistDetailFragment.TrackListHandler, MainActivityFragment.ArtistListHandler {
+    private static final String ARTIST_DETAIL_FRAGMENT_TAG = "ARTIST_DETAIL";
+    private boolean mIsTwoPaneMode;
+    private Artist mCurrentSelectedArtist;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        if (findViewById(R.id.artist_detail_container) != null) {
+            mIsTwoPaneMode = true;
+        } else {
+            mIsTwoPaneMode = false;
+        }
     }
 
 
@@ -34,5 +51,41 @@ public class MainActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onTrackSelected(int selectedTrackPosition, ArrayList<Track> tracks, String artistName) {
+        Bundle args = new Bundle();
+        args.putInt(TrackPlayer.ARG_POSITION, selectedTrackPosition);
+        args.putParcelableArrayList(TrackPlayer.ARG_TRACKS, tracks);
+        args.putString(TrackPlayer.ARG_ARTIST_NAME, artistName);
+        showDialog(args);
+    }
+    public void showDialog(Bundle args) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        TrackPlayer newFragment = new TrackPlayer();
+        newFragment.setArguments(args);
+        // The device is using a large layout, so show the fragment as a dialog
+        newFragment.show(fragmentManager, "dialog");
+
+    }
+    @Override
+    public ArtistInfo getCurrentArtistData() {
+        return new ArtistInfo(mCurrentSelectedArtist.getId(), mCurrentSelectedArtist.getName());
+    }
+
+    @Override
+    public void onArtistSelected(Artist artist) {
+        mCurrentSelectedArtist = artist;
+        if (!mIsTwoPaneMode) {
+            Intent intent = new Intent(this, ArtistDetail.class);
+            intent.putExtra("artist_id", mCurrentSelectedArtist.getId());
+            intent.putExtra("artist_name", mCurrentSelectedArtist.getName());
+            startActivity(intent);
+        } else {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.artist_detail_container, new ArtistDetailFragment(), ARTIST_DETAIL_FRAGMENT_TAG)
+                    .commit();
+        }
     }
 }
