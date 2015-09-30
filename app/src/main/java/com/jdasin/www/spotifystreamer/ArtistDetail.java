@@ -9,17 +9,21 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.jdasin.www.spotifystreamer.model.Artist;
 import com.jdasin.www.spotifystreamer.model.Track;
 
 import java.util.ArrayList;
 
 public class ArtistDetail extends ActionBarActivity implements ArtistDetailFragment.TrackListHandler {
 
+    public static final String ARTIST_PARAM = "ARTIST";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_artist_detail);
-        String artistName = getIntent().getExtras().getString("artist_name");
+        Artist artist = getIntent().getExtras().getParcelable(ARTIST_PARAM);
+        String artistName = artist.getName();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB ) {
             ActionBar ab = getActionBar();
             if (ab != null) {
@@ -30,6 +34,12 @@ public class ArtistDetail extends ActionBarActivity implements ArtistDetailFragm
             }
         } else {
             setTitle(getString(R.string.top_tracks)+ " - " + artistName);
+        }
+        if (savedInstanceState == null) {
+            ArtistDetailFragment fragment = ArtistDetailFragment.newInstance(artist);
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.artist_detail_container, fragment)
+                    .commit();
         }
     }
 
@@ -67,14 +77,4 @@ public class ArtistDetail extends ActionBarActivity implements ArtistDetailFragm
         args.putString(TrackPlayer.ARG_ARTIST_NAME, artistName);
         showDialog(args);
     }
-
-    @Override
-    public ArtistInfo getCurrentArtistData() {
-        String artistId = getIntent().getExtras().getString("artist_id");
-        String artistName = getIntent().getExtras().getString("artist_name");
-        ArtistInfo info = new ArtistInfo(artistId, artistName);
-        return info;
-    }
-
-
 }

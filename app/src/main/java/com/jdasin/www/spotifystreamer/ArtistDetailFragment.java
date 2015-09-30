@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import com.jdasin.www.spotifystreamer.adapters.TopTracksAdapter;
+import com.jdasin.www.spotifystreamer.model.Artist;
 import com.jdasin.www.spotifystreamer.model.Track;
 
 import java.util.ArrayList;
@@ -24,11 +25,18 @@ import kaaes.spotify.webapi.android.models.Tracks;
  */
 public class ArtistDetailFragment extends Fragment {
 
+    public static final String ARTIST_PARAM = "ARTIST";
     private TopTracksAdapter mAdapter;
     public TrackListHandler mTrackListHandler;
     private ArrayList<Track> mTracks;
-    private ArtistInfo mArtistInfo;
-
+    private Artist mArtist;
+    public static ArtistDetailFragment newInstance(Artist artist) {
+        Bundle arguments = new Bundle();
+        arguments.putParcelable(ArtistDetailFragment.ARTIST_PARAM, artist);
+        ArtistDetailFragment newFragment = new ArtistDetailFragment();
+        newFragment.setArguments(arguments);
+        return newFragment;
+    }
     public ArtistDetailFragment() {
         mTracks = new ArrayList<Track>();
     }
@@ -37,25 +45,27 @@ public class ArtistDetailFragment extends Fragment {
         super.onAttach(activity);
         try {
             mTrackListHandler = (TrackListHandler) activity;
-            mArtistInfo = mTrackListHandler.getCurrentArtistData();
+            //mArtistInfo = mTrackListHandler.getCurrentArtistData();
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString() + " must implement TrackListHandler.");
         }
     }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        Bundle arguments = getArguments();
+        mArtist = arguments.getParcelable(ARTIST_PARAM);
         View inflatedView = inflater.inflate(R.layout.fragment_artist_detail, container, false);
         ListView listView = (ListView) inflatedView.findViewById(R.id.list_view);
         mAdapter = new TopTracksAdapter(getActivity());
         listView.setAdapter(mAdapter);
         ArtistTop10TracksTask task = new ArtistTop10TracksTask();
-        task.execute(mArtistInfo.getArtistId());
+        task.execute(mArtist.getId());
         AdapterView.OnItemClickListener onITemClickListener = new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             Object clickedObject = parent.getAdapter().getItem(position);
             if (clickedObject instanceof Track) {
-                mTrackListHandler.onTrackSelected(position, mTracks, mArtistInfo.getArtistName());
+                mTrackListHandler.onTrackSelected(position, mTracks, mArtist.getName());
             }
             }
         };
@@ -97,7 +107,6 @@ public class ArtistDetailFragment extends Fragment {
 
     public interface TrackListHandler {
         void onTrackSelected(int selectedTrackPosition, ArrayList<Track> tracks, String artistName);
-        ArtistInfo getCurrentArtistData();
     }
 
 

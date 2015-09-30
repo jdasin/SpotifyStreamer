@@ -16,7 +16,6 @@ import java.util.ArrayList;
 public class MainActivity extends ActionBarActivity implements ArtistDetailFragment.TrackListHandler, MainActivityFragment.ArtistListHandler {
     private static final String ARTIST_DETAIL_FRAGMENT_TAG = "ARTIST_DETAIL";
     private boolean mIsTwoPaneMode;
-    private Artist mCurrentSelectedArtist;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,22 +68,16 @@ public class MainActivity extends ActionBarActivity implements ArtistDetailFragm
         newFragment.show(fragmentManager, "dialog");
 
     }
-    @Override
-    public ArtistInfo getCurrentArtistData() {
-        return new ArtistInfo(mCurrentSelectedArtist.getId(), mCurrentSelectedArtist.getName());
-    }
 
     @Override
     public void onArtistSelected(Artist artist) {
-        mCurrentSelectedArtist = artist;
         if (!mIsTwoPaneMode) {
             Intent intent = new Intent(this, ArtistDetail.class);
-            intent.putExtra("artist_id", mCurrentSelectedArtist.getId());
-            intent.putExtra("artist_name", mCurrentSelectedArtist.getName());
+            intent.putExtra(ArtistDetail.ARTIST_PARAM, artist);
             startActivity(intent);
         } else {
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.artist_detail_container, new ArtistDetailFragment(), ARTIST_DETAIL_FRAGMENT_TAG)
+                    .replace(R.id.artist_detail_container, ArtistDetailFragment.newInstance(artist), ARTIST_DETAIL_FRAGMENT_TAG)
                     .commit();
         }
     }
