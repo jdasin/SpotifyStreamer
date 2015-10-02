@@ -50,7 +50,11 @@ public class TrackPlayerService extends Service implements MediaPlayer.OnPrepare
     }
     @Override
     public void onDestroy() {
-        if (getMediaPlayer() != null) getMediaPlayer().release();
+        if (getMediaPlayer() != null) {
+            getMediaPlayer().stop();
+            getMediaPlayer().release();
+            mMediaPlayer = null;
+        }
     }
     @Nullable
     @Override
@@ -72,13 +76,6 @@ public class TrackPlayerService extends Service implements MediaPlayer.OnPrepare
         return false;
     }
 
-    @Override
-    public boolean onUnbind(Intent intent){
-        getMediaPlayer().stop();
-        getMediaPlayer().release();
-        mMediaPlayer = null;
-        return false;
-    }
 
     public void setTracks(ArrayList<Track> list) {
         this.mTracks = list;
@@ -178,5 +175,4 @@ public class TrackPlayerService extends Service implements MediaPlayer.OnPrepare
             return TrackPlayerService.this;
         }
     }
-
 }

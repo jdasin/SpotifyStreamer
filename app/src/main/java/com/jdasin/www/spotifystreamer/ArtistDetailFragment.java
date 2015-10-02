@@ -45,7 +45,6 @@ public class ArtistDetailFragment extends Fragment {
         super.onAttach(activity);
         try {
             mTrackListHandler = (TrackListHandler) activity;
-            //mArtistInfo = mTrackListHandler.getCurrentArtistData();
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString() + " must implement TrackListHandler.");
         }

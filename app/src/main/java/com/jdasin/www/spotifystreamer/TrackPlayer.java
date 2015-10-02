@@ -54,6 +54,8 @@ public class TrackPlayer extends DialogFragment {
     private TextView mCurrentTime;
     private TextView mTotalTime;
     private TextView mTrackNameTextView;
+    private Thread mTrackBarThread;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -156,6 +158,8 @@ public class TrackPlayer extends DialogFragment {
             mIntent = new Intent(getActivity(), TrackPlayerService.class);
             getActivity().bindService(mIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
             getActivity().startService(mIntent);
+        } else {
+            getActivity().bindService(mIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
         }
     }
 
@@ -177,6 +181,11 @@ public class TrackPlayer extends DialogFragment {
             mService.setTracks(mTracks);
             mService.setSongPosition(mSelectedPosition);
             mServiceBound = true;
+            if (mService.isPlaying()) {
+                musicThreadFinished = true;
+                launchTrackbarThread();
+                showPauseButton();
+            }
         }
 
         @Override
@@ -197,13 +206,17 @@ public class TrackPlayer extends DialogFragment {
     public void playTrack() {
         mService.playSong();
         showPauseButton();
+        launchTrackbarThread();
+    }
+
+    private void launchTrackbarThread() {
         if (musicThreadFinished) {
-            new Thread(new Runnable() {
+            mTrackBarThread = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     musicThreadFinished = false;
                     int currentPosition = 0;
-                    while (!musicThreadFinished) {
+                    while (!musicThreadFinished || !Thread.currentThread().isInterrupted()) {
                         try {
                             Thread.sleep(1000);
                             currentPosition = mService.getPlayingPosition();
@@ -221,7 +234,8 @@ public class TrackPlayer extends DialogFragment {
                         mSeekBar.setMax(total);
                         if (!mService.isPaused()) {
                             mSeekBar.setProgress(currentPosition);
-                            if (getActivity() != null) {
+                            Activity activity = getActivity();
+                            if (activity != null) {
                                 getActivity().runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
@@ -235,14 +249,17 @@ public class TrackPlayer extends DialogFragment {
                                             mCurrentTime.setText(curTime);
                                         }
                                         mTotalTime.setText(totalTime);
-                                        boolean isPlaying = mService.isPlaying();
                                     }
                                 });
+                            } else {
+                                Thread.currentThread().interrupt();
+                                musicThreadFinished = true;
                             }
                         }
                     }
                 }
-            }).start();
+            });
+            mTrackBarThread.start();
         }
     }
 
