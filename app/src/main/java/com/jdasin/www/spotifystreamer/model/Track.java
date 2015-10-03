@@ -7,24 +7,15 @@ import android.os.Parcelable;
  * Created by Daniel on 7/11/2015.
  */
 public class Track implements Parcelable {
-    public static final String TABLE_NAME = "artist";
-    public static final String ID = "id";
-    public static final String NAME = "name";
-    public static final String IMAGE_URL = "image_url";
-
-
     private String trackName;
     private Album album;
-
-    private String albumName;
-    private String albumLargeImage;
-    private String albumSmallImage;
     private String playUrl;
-
+    private String id;
     public Track(kaaes.spotify.webapi.android.models.Track track) {
         this.setTrackName(track.name);
         this.setAlbum(track.album != null ? new Album(track.album) : null);
         this.setPlayUrl(track.preview_url);
+        this.setId(track.id);
     }
     public Track(Parcel parcel) {
         this.setTrackName(parcel.readString());
@@ -54,6 +45,15 @@ public class Track implements Parcelable {
     public void setAlbum(Album album) {
         this.album = album;
     }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -78,4 +78,5 @@ public class Track implements Parcelable {
         }
 
     };
+
 }

@@ -177,14 +177,18 @@ public class TrackPlayer extends DialogFragment {
             TrackPlayerService.TrackPlayerBinder binder = (TrackPlayerService.TrackPlayerBinder)service;
             //get service
             mService = binder.getService();
+            boolean continuePlaying = mService.isPlaying() && (mSelectedTrack.getId() == mService.getCurrentTrack().getId());
+            if (continuePlaying) {
+                musicThreadFinished = true;
+                launchTrackbarThread();
+                showPauseButton();
+            }
             //pass list
             mService.setTracks(mTracks);
             mService.setSongPosition(mSelectedPosition);
             mServiceBound = true;
-            if (mService.isPlaying()) {
-                musicThreadFinished = true;
-                launchTrackbarThread();
-                showPauseButton();
+            if (!continuePlaying) {
+                playTrack();
             }
         }
 

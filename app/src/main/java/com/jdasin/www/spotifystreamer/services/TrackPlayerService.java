@@ -169,6 +169,9 @@ public class TrackPlayerService extends Service implements MediaPlayer.OnPrepare
         return isPaused;
     }
 
+    public Track getCurrentTrack() {
+        return mTracks.get(mSongPosition);
+    }
 
     public class TrackPlayerBinder extends Binder {
         public TrackPlayerService getService() {
