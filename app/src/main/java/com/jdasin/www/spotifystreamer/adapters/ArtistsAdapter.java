@@ -26,13 +26,45 @@ public class ArtistsAdapter extends ArrayAdapter<Artist>{
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         Artist artist = getItem(position);
-        View itemView = LayoutInflater.from(getContext()).inflate(R.layout.artist_list_item,parent,false);
-        TextView textView = (TextView) itemView.findViewById(R.id.list_item_text);
-        textView.setText(artist.getName());
-        ImageView imageView = (ImageView) itemView.findViewById(R.id.list_item_image);
-        if (artist.getImageUrl() != null) {
-            Picasso.with(getContext()).load(artist.getImageUrl()).resize(100,100).centerCrop().into(imageView);
+        View itemView;
+        ViewHolder holder;
+        if (convertView == null) {
+            LayoutInflater inflater = (LayoutInflater) getContext()
+                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            itemView = inflater.inflate(R.layout.artist_list_item, parent, false);
+            holder = new ViewHolder();
+            holder.setNameTextView((TextView) itemView.findViewById(R.id.list_item_text));
+            holder.setImageView((ImageView) itemView.findViewById(R.id.list_item_image));
+            itemView.setTag(holder);
+        } else {
+            holder = (ViewHolder) convertView.getTag();
+            itemView = convertView;
+        }
+        holder.getNameTextView().setText(artist.getName());
+        if ((artist.getImageUrl() != null)) {
+            Picasso.with(getContext()).load(artist.getImageUrl()).resize(100, 100).centerCrop().into(holder.getImageView());
         }
         return itemView;
+    }
+
+    private class ViewHolder {
+        private TextView nameTextView;
+        private ImageView imageView;
+
+        public void setNameTextView(TextView nameTextView) {
+            this.nameTextView = nameTextView;
+        }
+
+        public TextView getNameTextView() {
+            return nameTextView;
+        }
+
+        public void setImageView(ImageView imageView) {
+            this.imageView = imageView;
+        }
+
+        public ImageView getImageView() {
+            return imageView;
+        }
     }
 }

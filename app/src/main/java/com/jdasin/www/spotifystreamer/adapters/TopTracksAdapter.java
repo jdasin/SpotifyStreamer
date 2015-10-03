@@ -25,16 +25,58 @@ public class TopTracksAdapter extends ArrayAdapter<Track> {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         Track track = getItem(position);
-        View itemView = LayoutInflater.from(getContext()).inflate(R.layout.track_list_item, parent, false);
-        TextView trackNameTextView = (TextView) itemView.findViewById(R.id.track_name);
-        trackNameTextView.setText(track.getTrackName());
-        TextView albumNameTextView = (TextView) itemView.findViewById(R.id.track_album);
-        ImageView imageView = (ImageView) itemView.findViewById(R.id.list_item_image);
+        ViewHolder holder;
+        View itemView;
+        if(convertView == null) {
+            LayoutInflater inflater = (LayoutInflater) getContext()
+                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            itemView = inflater.inflate(R.layout.track_list_item, parent, false);
+            holder = new ViewHolder();
+            holder.setNameTextView((TextView) itemView.findViewById(R.id.track_name));
+            holder.setAlbumTextView((TextView) itemView.findViewById(R.id.track_album));
+            holder.setImageView((ImageView) itemView.findViewById(R.id.list_item_image));
+            itemView.setTag(holder);
+        }
+        else {
+            holder = (ViewHolder) convertView.getTag();
+            itemView = convertView;
+        }
+        holder.getNameTextView().setText(track.getTrackName());
         Album album = track.getAlbum();
         if ((album != null)) {
-            albumNameTextView.setText(album.getAlbumName());
-            Picasso.with(getContext()).load(album.getSmallImageUrl()).resize(100,100).centerCrop().into(imageView);
+            holder.getAlbumTextView().setText(album.getAlbumName());
+            Picasso.with(getContext()).load(album.getSmallImageUrl()).resize(100,100).centerCrop().into(holder.getImageView());
         }
         return itemView;
+    }
+
+    private class ViewHolder {
+        private TextView nameTextView;
+        private TextView albumTextView;
+        private ImageView imageView;
+
+        public TextView getNameTextView() {
+            return nameTextView;
+        }
+
+        public void setNameTextView(TextView nameTextView) {
+            this.nameTextView = nameTextView;
+        }
+
+        public TextView getAlbumTextView() {
+            return albumTextView;
+        }
+
+        public void setAlbumTextView(TextView albumTextView) {
+            this.albumTextView = albumTextView;
+        }
+
+        public ImageView getImageView() {
+            return imageView;
+        }
+
+        public void setImageView(ImageView imageView) {
+            this.imageView = imageView;
+        }
     }
 }
